@@ -12,7 +12,7 @@ module.exports = {
     iterations: 2,
     friction: 0.4,
     restitution: 0.3,
-    stepInterval: 50,
+    stepInterval: 100,
     defaultTimeStep: 0.1,
   },
   dungeon: {
@@ -23,6 +23,6 @@ module.exports = {
   },
   map: {
     cubeSize: 10,
-    cubeHeight: 30,
+    cubeHeight: 50,
   },
 };

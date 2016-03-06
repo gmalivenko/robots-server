@@ -1,4 +1,5 @@
 'use strict';
+
 var config = require('../config.js');
 var log = require('debug')('connection');
 
@@ -18,6 +19,10 @@ module.exports = (socket) => {
     config.dungeon.roomSize
   );
 
+  let bot = new Robot(world);
+  bot.randomize();
+  bot.appendToWorld(new CANNON.Vec3(maze.spawn.x * config.map.cubeSize, maze.spawn.y * config.map.cubeSize, config.robot.spawnHeight));
+
   for (var i = 0; i < maze.h; i++) {
     for (var j = 0; j < maze.w; j++) {
       if (maze.maze[i][j] == 0) {
@@ -28,24 +33,14 @@ module.exports = (socket) => {
 
   var points = maze.spawnObjects(config.dungeon.rooms);
   log('Points', points);
-  let hasTarget = false;
+  bot.pointsCount = points.length;
   for (let i = 0; i < points.length; i++) {
     var point = world.addCube(new CANNON.Vec3(points[i][0] * config.map.cubeSize, points[i][1] * config.map.cubeSize, 0));
-    if (Math.random() > 0.8 && !hasTarget) {
-      point.userData = {type: 'target'};
-      hasTarget = 1;
-    } else {
-      point.userData = {type: 'point'};
-    }
-
+    point.userData = {type: 'point', val: 1};
     point.collisionResponse = 0;
-  };
+  }
 
-  let bot = new Robot(world);
-  bot.randomize();
-  bot.appendToWorld(new CANNON.Vec3(maze.spawn.x * config.map.cubeSize, maze.spawn.y * config.map.cubeSize, config.robot.spawnHeight));
-
-  world.startSimulation(bot.onTick);
+  world.startSimulation();
 
   socket.on('robot.getState', (data, cb) => {
     if (cb) {
@@ -66,6 +61,7 @@ module.exports = (socket) => {
   });
 
   socket.on('robot.applyForce', (data) => {
-    bot.force = new CANNON.Vec3(data.fx, data.fy, data.fz);
+    bot.force = new CANNON.Vec3(data.fx, data.fy, 0);
   });
+
 };
