@@ -3,13 +3,13 @@
 var config = require('../config.js');
 var log = require('debug')('connection');
 
-var CANNON = require('cannon');
-
-let Robot = require('../lib/robot.js');
-let World = require('../lib/world.js');
-let Maze = require('../lib/maze.js');
-
 module.exports = (socket) => {
+  let CANNON = require('cannon');
+
+  let Robot = require('../lib/robot.js');
+  let World = require('../lib/world.js');
+  let Maze = require('../lib/maze.js');
+
   let world = new World();
 
   let maze = new Maze(
