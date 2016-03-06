@@ -16,8 +16,8 @@ module.exports = {
     defaultTimeStep: 0.1,
   },
   dungeon: {
-    width: 50,
-    height: 50,
+    width: 30,
+    height: 30,
     rooms: 50,
     roomSize: 10,
   },

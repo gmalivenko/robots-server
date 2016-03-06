@@ -4,14 +4,11 @@ var log = require('debug')('connection');
 
 var CANNON = require('cannon');
 
-let Robot = require('../models/robot.js');
-let World = require('../models/world.js');
-let Maze = require('../models/maze.js');
+let Robot = require('../lib/robot.js');
+let World = require('../lib/world.js');
+let Maze = require('../lib/maze.js');
 
 module.exports = (socket) => {
-  let Robot = require('../models/robot.js');
-  let World = require('../models/world.js');
-
   let world = new World();
 
   let maze = new Maze(
@@ -29,6 +26,21 @@ module.exports = (socket) => {
     }
   }
 
+  var points = maze.spawnObjects(config.dungeon.rooms);
+  log('Points', points);
+  let hasTarget = false;
+  for (let i = 0; i < points.length; i++) {
+    var point = world.addCube(new CANNON.Vec3(points[i][0] * config.map.cubeSize, points[i][1] * config.map.cubeSize, 0));
+    if (Math.random() > 0.8 && !hasTarget) {
+      point.userData = {type: 'target'};
+      hasTarget = 1;
+    } else {
+      point.userData = {type: 'point'};
+    }
+
+    point.collisionResponse = 0;
+  };
+
   let bot = new Robot(world);
   bot.randomize();
   bot.appendToWorld(new CANNON.Vec3(maze.spawn.x * config.map.cubeSize, maze.spawn.y * config.map.cubeSize, config.robot.spawnHeight));
@@ -39,27 +51,13 @@ module.exports = (socket) => {
     if (cb) {
       cb(bot._toJSON());
     }
-    /*
-    var str = '';
-    for (var i = 0; i < maze.h; i++) {
-      for (var j = 0; j < maze.w; j++) {
-        if (Math.floor(bot.x / config.map.cubeSize) == j && Math.floor(bot.y / config.map.cubeSize) == i) {
-          str += '@';
-        } else
-        if (maze.maze[i][j] == 0) {
-          str += '#';
-        } else {
-          str += ' ';
-        }
-      }
-
-      str += '\n';
-    }
-
-    console.log(str);*/
   });
 
-  socket.on('map.get', (data, cb) => {
+  socket.on('map.getPoints', (data, cb) => {
+    cb(points);
+  });
+
+  socket.on('map.getMaze', (data, cb) => {
     cb(maze.maze);
   });
 
